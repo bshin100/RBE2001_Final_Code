@@ -116,10 +116,10 @@ void BlueMotor::startMoveTo(float position) {
  */
 void BlueMotor::loopController() {
     if (!bm_PID.onTarget(getPosition())) {
-        Serial.print("Current Pos.: ");
-        Serial.print(getPosition());
-        Serial.print("  || Setpoint: ");
-        Serial.println(pullSetpoint());
+        // Serial.print("Current Pos.: ");
+        // Serial.print(getPosition());
+        // Serial.print("  || Setpoint: ");
+        // Serial.println(pullSetpoint());
         setEffortWithoutDB( -bm_PID.calculateEffort(getPosition()) );
         delay(10); // Run at 100Hz
     } else {

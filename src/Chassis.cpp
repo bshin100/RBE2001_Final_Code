@@ -5,7 +5,7 @@
  * Constructor for class Chassis
  */
 Chassis::Chassis() {
-    chassis_PID = PIDController(20.0, 0.4, 0.3);
+    chassis_PID = PIDController(5.0, 0.1, 0.05);
 }
 
 /**
@@ -14,6 +14,22 @@ Chassis::Chassis() {
  */
 void Chassis::drive(float effort) {
     motors.setEfforts(effort, effort);
+}
+
+void Chassis::setEfforts(float effortLeft, float effortRight) {
+    motors.setEfforts(effortLeft, effortRight);
+}
+
+void Chassis::setEffortsBoolean(bool effortLeft, bool effortRight) {
+    if(effortLeft && !effortRight) {
+        motors.setEfforts(SPEED_VAL, 0);
+    } else if(!effortLeft && effortRight) {
+        motors.setEfforts(0, SPEED_VAL);
+    } else if(effortLeft, effortRight) {
+        motors.setEfforts(SPEED_VAL, SPEED_VAL);
+    } else if(!effortLeft && !effortRight) {
+        motors.setEfforts(0, 0);     
+    }
 }
 
 /** 
@@ -59,7 +75,7 @@ void Chassis::startUltraDrive(float inches, float ultraInput) {
 void Chassis::loopUltraPID(float ultraInput) {
     if(!chassis_PID.onTarget(ultraInput)) {
         float eff = chassis_PID.calculateEffort(ultraInput);
-        //Serial.println(eff);
+        Serial.println(eff);
         
         if(eff > 0 && abs(eff) < SPEED_VAL) { // + effort; below max
             drive(eff);

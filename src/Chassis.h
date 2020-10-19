@@ -7,6 +7,8 @@ class Chassis {
     public:     
         Chassis();
         void drive(float effort);
+        void setEfforts(float effortLeft, float effortRight);
+        void setEffortsBoolean(bool effortLeft, bool effortRight);
         void driveDistance(float inches);
         void startUltraDrive(float inches, float ultraInput); 
         void loopUltraPID(float ultraInput);
@@ -16,7 +18,7 @@ class Chassis {
         bool turnComplete();
         void setup();
         
-        const int SPEED_VAL = 100;          // Default driving speed for chassis commands
+        const int SPEED_VAL = 75;          // Default driving speed for chassis commands
         const int CPR = 1440;               // Encoder count per revolution (adjusted for GR)
         const float wheelDiameter = 2.8;    // Diameter in inches of chassis wheels
         const float wheelTrack = 5.75;      // Distance in inches between wheels from side to side
