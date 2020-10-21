@@ -29,7 +29,8 @@ int LineSensor::readSensor(bool left) {
 }
 
 /**
- * Follow a line forward
+ * Follow a line forward with condition checking
+ * @author Jack Bergin
  */
 void LineSensor::setLineFollowForward() {
     int left_sensor_state = readSensor(true);
@@ -79,6 +80,10 @@ void LineSensor::setLineFollowForward() {
   }
 }
 
+/**
+ * Follow a line backward with condition checking
+ * @author Jack Bergin
+ */
 void LineSensor::setLineFollowBackward() {
     int left_sensor_state = readSensor(true);
     int right_sensor_state = readSensor(false);

@@ -23,8 +23,9 @@ IRDecoder decoder;
 LineSensor lineSensor;
 
 // ----- CONFIG START ----- //
-const bool TESTING = true;             // Enable testing sequence instead of autonomous sequence
+const bool TESTING = false;             // Enable testing sequence instead of autonomous sequence
 const bool SKIP_TRAVERSE = true;        // Skip the ambitious traversal across the field to the other side
+const bool ALUM_PLATE = true;           // Switch for aluminum-plate-specific code
 bool AUTO_2 = false;
 const float GEAR_RATIO_LIFTER = 30.8;   // Lifter gear ratio
 
@@ -122,8 +123,9 @@ void testSequence() {
     // }
 
     lineSensor.loop();
-    lineSensor.setLineFollowForward();
-    chassis.setEffortsBoolean(lineSensor.leftDrive, lineSensor.rightDrive);
+    //lineSensor.setLineFollowForward();
+    //chassis.setEffortsBoolean(lineSensor.leftDrive, lineSensor.rightDrive);
+    chassis.startLinePID(lineSensor.readSensor(true), lineSensor.readSensor(false));
 }
 
 /*
@@ -135,6 +137,7 @@ Start directly under the 25 deg roof, gripper open.
 7. Lift arm to 25 deg height                8. Return to structure with line follow + dead + ultrasonic (last leg)
 9. Wait for confirm, Open Gripper           10. Back up X CM
 */
+const bool skip_ir = true;
 
 void autoSequence1() {
     static States previousState = IDLE;
@@ -146,7 +149,7 @@ void autoSequence1() {
     switch (state) {
         case SETUP_RAISE:
         // Raise the arm from its zeroed position then open gripper.
-        blueMotor.startMoveTo(LIFTER_25ROOF * GEAR_RATIO_LIFTER);
+        blueMotor.startMoveTo((LIFTER_25ROOF+1) * GEAR_RATIO_LIFTER);
         blueMotor.loopController();
         if (blueMotor.pullOnTarget()) {
             Serial.println("Lifter arm movement complete");
@@ -163,6 +166,10 @@ void autoSequence1() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount1++;
+            if(skip_ir) {
+                delay(10000);
+                paused = false;
+            }
         }
 
         if(!paused) state = GRIPPING_1;
@@ -181,6 +188,10 @@ void autoSequence1() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount2++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) {
@@ -196,7 +207,11 @@ void autoSequence1() {
         Serial.print("Dist: ");
         Serial.println(rangeFinder.getDistance());
         
-        blueMotor.startMoveTo(LIFTER_PLATFORM * GEAR_RATIO_LIFTER);
+        if(ALUM_PLATE) {
+            blueMotor.startMoveTo((LIFTER_PLATFORM-14.5) * GEAR_RATIO_LIFTER);
+        } else {
+            blueMotor.startMoveTo(LIFTER_PLATFORM * GEAR_RATIO_LIFTER);
+        }
         blueMotor.loopController();
         if (blueMotor.pullOnTarget()) {
             Serial.println("Lifter arm movement complete");
@@ -232,7 +247,7 @@ void autoSequence1() {
         case DRIVE_FWD_PLATFORM:
         // Drive to platform with linefollow/ultrasonic/both
         //chassis.loopUltraPID(rangeFinder.getDistance());
-        if(rangeFinder.getDistance() <= 2.0) {
+        if(rangeFinder.getDistance() <= 2.5) {
         //if(chassis.pullOnTarget(rangeFinder.getDistance())) {
             Serial.println("Chassis target reached");
             chassis.drive(0);
@@ -247,6 +262,10 @@ void autoSequence1() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount3++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = RELEASE_1;
@@ -265,6 +284,10 @@ void autoSequence1() {
             Serial.println("Awaiting user confirmation");
             paused = true;
             tempCount4++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = GRIPPING_2;
@@ -280,7 +303,7 @@ void autoSequence1() {
 
         case DRIVE_REV_LIFT_1:
         // Line follow and drive in reverse until intersection, also raise arm to 25 deg roof height
-        if(rangeFinder.getDistance() >= DIST_PLATFORM) {
+        if(rangeFinder.getDistance() >= DIST_PLATFORM-0.3) {
             Serial.println("Chassis target reached.");
             chassis.drive(0);
         }
@@ -290,7 +313,7 @@ void autoSequence1() {
             Serial.println("Lifter arm movement complete");
             blueMotor.setEffort(0);
             state = TURN_RIGHT_1;
-            chassis.startTurn(85);
+            chassis.startTurn(84);
         }
         break;
 
@@ -321,6 +344,10 @@ void autoSequence1() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount5++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = RELEASE_2;
@@ -383,6 +410,10 @@ void autoSequence2() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount1++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = GRIPPING_1;
@@ -401,6 +432,10 @@ void autoSequence2() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount2++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) {
@@ -471,6 +506,10 @@ void autoSequence2() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount3++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = RELEASE_1;
@@ -489,6 +528,10 @@ void autoSequence2() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount4++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = GRIPPING_2;
@@ -545,6 +588,10 @@ void autoSequence2() {
             Serial.print("Awaiting user confirmation");
             paused = true;
             tempCount5++;
+            if(skip_ir) {
+                delay(5000);
+                paused = false;
+            }
         }
 
         if(!paused) state = RELEASE_2;
@@ -623,6 +670,7 @@ void loop() {
       blueMotor.setEffort(0);
   } else {
       // Run main sequencing
-      if(!TESTING && !AUTO_2) autoSequence1(); else if(AUTO_2) autoSequence2(); else testSequence();
+      if(!TESTING && !AUTO_2) autoSequence1(); else if(!TESTING && AUTO_2) autoSequence2(); else testSequence();
+      //autoSequence1();
   }
 }

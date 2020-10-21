@@ -6,6 +6,7 @@
  */
 Chassis::Chassis() {
     chassis_PID = PIDController(5.0, 0.1, 0.05);
+    line_PID = PIDController(0.1, 0.00, 0.01);
 }
 
 /**
@@ -100,6 +101,22 @@ void Chassis::loopUltraPID(float ultraInput) {
  */
 bool Chassis::pullOnTarget(float ultraInput) {
     return chassis_PID.onTarget(ultraInput);
+}
+
+/**
+ * Follow a black line with PID control to the chassis 
+ */
+void Chassis::startLinePID(float lineLeftInput, float lineRightInput) {
+    float leftDiff = lineLeftInput - lineRightInput;
+    float rightDiff = lineLeftInput + lineRightInput;
+    //line_PID.setSetpoint(1); // FIXME: find a target threshold
+    //float eff = line_PID.calculateEffort();
+
+    setEfforts(leftDiff * line_PID.getGainValue(1), rightDiff * line_PID.getGainValue(1));
+
+    if(lineLeftInput < 800 && lineRightInput < 800) { // Detect an intersection and stop
+        drive(0);
+    }
 }
 
 /** 

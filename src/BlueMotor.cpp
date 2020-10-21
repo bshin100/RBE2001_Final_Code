@@ -8,7 +8,8 @@ static BlueMotor *bm_instance; // Create an instance of the BlueMotor class to r
  * Constructor for class BlueMotor  
  */
 BlueMotor::BlueMotor() {
-    bm_PID = PIDController(4.5, 0.02, 0.02);
+    //bm_PID = PIDController(4.5, 0.02, 0.02);
+    bm_PID = PIDController(5.0, 0.03, 0.02); // PID for aluminum plate 
 }
 
 /**
@@ -116,10 +117,10 @@ void BlueMotor::startMoveTo(float position) {
  */
 void BlueMotor::loopController() {
     if (!bm_PID.onTarget(getPosition())) {
-        // Serial.print("Current Pos.: ");
-        // Serial.print(getPosition());
-        // Serial.print("  || Setpoint: ");
-        // Serial.println(pullSetpoint());
+        Serial.print("Current Pos.: ");
+        Serial.print(getPosition());
+        Serial.print("  || Setpoint: ");
+        Serial.println(pullSetpoint());
         setEffortWithoutDB( -bm_PID.calculateEffort(getPosition()) );
         delay(10); // Run at 100Hz
     } else {
